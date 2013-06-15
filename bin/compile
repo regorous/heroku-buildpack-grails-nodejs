@@ -346,7 +346,9 @@ if [ ! -d server ] ; then
     echo $DEFAULT_RUNNER_JAR > server/defaultRunnerJar
 fi
 
+echo "-----> Building runtime environment"
 PROFILE_PATH="$BUILD_DIR/.profile.d/grails.sh"
 mkdir -p $(dirname $PROFILE_PATH)
 echo 'export PATH="/app/.jdk/bin:$PATH"' >> $PROFILE_PATH
-
+./release . > Procfile
+cat Procfile
