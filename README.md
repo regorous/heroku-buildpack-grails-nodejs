@@ -1,38 +1,59 @@
 Heroku buildpack: Grails and Node.js
 ====================================
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for Grails apps that also requires NodeJS. Installs Node 0.10.11 by default.
+This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for Grails apps that also requires NodeJS.
+
 It uses [NPM](http://npmjs.org/) and [SCons](http://www.scons.org/).
 
 Usage
 -----
 
-Example usage:
+Create a Git repository for a Grails 1.3.7 or 2.0 app:
 
+    $ cd mygrailsapp
     $ ls
-    Procfile  package.json  web.js
+    application.properties    lib        src               target    web-app
+    grails-app                scripts    stacktrace.log    test
+    $ grails integrate-with --git
+    | Created Git project files..
+    $ git init
+    Initialized empty Git repository in /Users/jjoergensen/mygrailsapp/.git/
+    $ git commit -m init
+    [master (root-commit) 7febdd9] init
+     58 files changed, 2788 insertions(+), 0 deletions(-)
+     create mode 100644 .classpath
+     create mode 100644 .gitignore
+     create mode 100644 .project
+     create mode 100644 application.properties
+    ...
+    
+Create a Heroku app on the Cedar stack
 
-    $ heroku create --buildpack http://github.com/heroku/heroku-buildpack-nodejs.git
+    $ heroku create --stack cedar
+    Creating vivid-mist-9984... done, stack is cedar
+    http://vivid-mist-9984.herokuapp.com/ | git@heroku.com:vivid-mist-9984.git
+    Git remote heroku added
+
+Push the app to Heroku
 
     $ git push heroku master
-    ...
+    Counting objects: 73, done.
+    Delta compression using up to 4 threads.
+    Compressing objects: 100% (69/69), done.
+    Writing objects: 100% (73/73), 97.82 KiB, done.
+    Total 73 (delta 2), reused 0 (delta 0)
+
     -----> Heroku receiving push
-    -----> Fetching custom buildpack
-    -----> Node.js app detected
-    -----> Vendoring node 0.4.7
-    -----> Installing dependencies with npm 1.0.8
-           express@2.1.0 ./node_modules/express
-           ├── mime@1.2.2
-           ├── qs@0.3.1
-           └── connect@1.6.2
-           Dependencies installed
+    -----> Grails app detected
+    -----> Grails 2.0.0 app detected
+    -----> Installing Grails 2.0.0..... done
+    -----> executing grails -plain-output -Divy.default.ivy.user.dir=/app/tmp/repo.git/.cache war
 
-The buildpack will detect your app as Node.js if it has the file `package.json` in the root.  It will use NPM to install your dependencies, and vendors a version of the Node.js runtime into your slug.  The `node_modules` directory will be cached between builds to allow for faster NPM install time.
+           |Loading Grails 2.0.0
+           |Configuring classpath
+    ...
 
-Node.js and npm versions
-------------------------
-
-You can specify the versions of Node.js and npm your application requires using `package.json`
+To configure the Node.JS version, put a package.json file in the base directory of your project that lists project dependencies including Node.JS and NPM versions.
 
     {
       "name": "myapp",
@@ -48,28 +69,17 @@ To list the available versions of Node.js and npm, see these manifests:
 http://heroku-buildpack-nodejs.s3.amazonaws.com/manifest.nodejs
 http://heroku-buildpack-nodejs.s3.amazonaws.com/manifest.npm
 
-Contributing
-------------
+### Auto-detection
 
-To use this buildpack, fork it on Github. Push up changes to your fork, then create a test app with `--buildpack <your-github-url>` and push to it.
+Heroku auto-detects Grails apps by the existence of the `grails-app` directory in the project root and the `application.properties`  file is also expected to exist in the root directory. 
 
-To change the vendored binaries for Node.js, NPM, and SCons, use the helper scripts in the `support/` subdirectory.  You'll need an S3-enabled AWS account and a bucket to store your binaries in.
+### Using a Customized (Forked) Build Pack
 
-For example, you can change the default version of Node.js to v0.6.7.
+This is the default buildpack repository for Grails. You can fork this repo and tell Heroku to use the forked version by passing the `--buildpack` option to `heroku create`:
 
-First you'll need to build a Heroku-compatible version of Node.js:
+    $ heroku create --stack cedar --buildpack http://github.com/jesperfj/heroku-buildpack-grails.git
 
-    $ export AWS_ID=xxx AWS_SECRET=yyy S3_BUCKET=zzz
-    $ s3 create $S3_BUCKET
-    $ support/package_nodejs 0.6.7
+## License
 
-Open `bin/compile` in your editor, and change the following lines:
+Licensed under the MIT License. See LICENSE file.
 
-    DEFAULT_NODE_VERSION="0.6.7"
-    S3_BUCKET=zzz
-
-Commit and push the changes to your buildpack to your Github fork, then push your sample app to Heroku to test.  You should see:
-
-    -----> Vendoring node 0.6.7
-
-For more info, see [CONTRIBUTING.md](CONTRIBUTING.md)
