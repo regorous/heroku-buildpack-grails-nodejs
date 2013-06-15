@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# bin/release <build-dir>
+
+cat <<EOF
+---
+config_vars:
+  PATH: bin:node_modules/.bin:.jdk/bin:.sbt_home/bin:/usr/local/bin:/usr/bin:/bin
+  JAVA_OPTS: -Xmx384m -Xss512k -XX:+UseCompressedOops
+addons:
+  heroku-postgresql:dev
+EOF
+
+if [ -f $BUILD_DIR/server/defaultRunnerJar ]; then
+  cat <<EOF
+
+default_process_types:
+  web:      java \$JAVA_OPTS -jar $(cat $BUILD_DIR/server/defaultRunnerJar) \$RUNNER_OPTS --port \$PORT target/*.war
+EOF
+fi
