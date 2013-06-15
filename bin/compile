@@ -350,5 +350,3 @@ echo "-----> Building runtime environment"
 PROFILE_PATH="$BUILD_DIR/.profile.d/grails.sh"
 mkdir -p $(dirname $PROFILE_PATH)
 echo 'export PATH="/app/.jdk/bin:$PATH"' >> $PROFILE_PATH
-$BIN_DIR/release $BUILD_DIR > Procfile
-cat Procfile
