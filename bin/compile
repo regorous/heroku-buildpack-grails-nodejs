@@ -224,10 +224,6 @@ run_npm "install --production"
 run_npm "rebuild"
 echo "Dependencies installed" | indent
 
-echo "-----> Building runtime environment"
-mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\"\$HOME/bin:\$HOME/node_modules/.bin:\$PATH\"" > $BUILD_DIR/.profile.d/nodejs.sh
-
 if [ ! -f $BUILD_DIR/application.properties ] ; then
     echo "-----> File not found: application.properties. This file is required. Build failed."
     echo " !     Failed to build app"
